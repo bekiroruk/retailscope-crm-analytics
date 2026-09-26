@@ -64,3 +64,16 @@ revenue and is not suitable for budgeting without further calibration.
 - No campaign outcome: high risk is not evidence of positive treatment uplift.
 - A customer can appear in multiple time snapshots; this evaluates future
   scoring of existing customers, not unseen-customer generalization.
+
+## SQL Server integration
+
+GitHub Actions runs an ephemeral SQL Server 2022 container with Microsoft ODBC
+Driver 18. The integration test creates a dedicated database, applies
+`sql/uci_schema.sql`, loads all five core tables through
+`scripts/load_sqlserver_uci.py`, checks the monthly view, and confirms that an
+invalid risk value is rejected by the database constraint. The live smoke test
+passed for commit `d6e62b55ef0d642c25c77dae5333608e9e572b1c`.
+
+This validates SQL syntax, keys, checks, views, column contracts, and transaction
+behavior with a minimal relational fixture. It is not a performance benchmark
+or a claim that all 797,885 accepted events were loaded into SQL Server in CI.

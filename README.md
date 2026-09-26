@@ -93,10 +93,14 @@ UCI workbook
 - [`powerbi/real_measures.dax`](powerbi/real_measures.dax) provides GBP-aware
   measures for revenue, orders, returns, risk, and expected revenue.
 
-SQL Server and Power BI Desktop are not available in the Linux build
-environment. The DDL, loader, CSV contracts, and DAX assets are validated here;
-a live SQL Server connection and `.pbix` visual validation must be performed in
-an environment that provides those products. No unverified `.pbix` binary is
+GitHub Actions validates the DDL and transactional loader against a live SQL
+Server 2022 container: all five tables, the monthly view, foreign keys, and
+CHECK constraints are exercised with a relational smoke fixture. The full
+797,885-event dataset was run through Python locally but is not loaded in CI.
+
+Power BI Desktop is not available in the Linux build environment. The CSV
+contracts, relationship guide, and DAX measures are delivered, but `.pbix`
+visual validation must be completed on Windows. No unverified `.pbix` binary is
 committed.
 
 ## Repository map
