@@ -1,33 +1,54 @@
-# Power BI — UCI real-data model
+# Real-data model guide
 
-Use the CSV files in `outputs/real/marts/`. Import them as UTF-8 and use the
-English (United States) locale for decimal parsing. Currency is GBP.
+## Grain and semantics
 
-## Relationships
-
-| One | Many | Direction |
+| Table | Grain | Primary analytical use |
 |---|---|---|
-| `dim_customer.customer_id` | `fact_sales.customer_id` | Single |
-| `dim_product.product_id` | `fact_sales.product_id` | Single |
-| `dim_date.date` | `fact_sales.event_date` | Single |
-| `dim_customer.customer_id` | `customer_scores.customer_id` | Single |
+| `fact_sales` | One accepted sale or return line | Revenue, orders, customers, products, returns |
+| `dim_customer` | One identified customer | Country and customer filtering |
+| `dim_product` | One product code | Product filtering and ranking |
+| `dim_date` | One calendar date | Transaction time analysis |
+| `customer_scores` | One customer at the 2011-12-10 cutoff | RFM segment, inactivity risk, expected revenue |
+| `cohort_retention` | One acquisition cohort and month index | Retention matrix |
+| `model_metrics` | One held-out evaluation metric | Model-versus-baseline evidence |
+| `data_quality_metrics` | One quality or reconciliation metric | Pipeline control totals |
 
-Mark `dim_date[date]` as the date table. Do not connect `snapshot_date` to the
-transaction date relationship. Use a single-select `snapshot_date` slicer for
-score visuals. Add each expression in `real_measures.dax` as a separate measure.
+Currency is GBP. CSV files use UTF-8 with BOM, ISO dates, and a period as the
+decimal separator. The supplied Power Query expressions apply the `en-US`
+locale so decimal parsing does not depend on the workstation locale.
 
-## Suggested report pages
+## Important calculation choices
 
-| Page | Visuals |
-|---|---|
-| Executive overview | Net revenue, orders, customers, monthly trend, return-value rate |
-| Customer 360 | RFM segment, risk distribution, recency/frequency scatter, customer table |
-| Revenue outlook | Expected 90-day revenue, risk-versus-value scatter, top products |
-| Cohorts | `cohort_retention` matrix: cohort × month index, maximum retention rate |
-| Data quality | Accepted/quarantined/duplicate rows from `data_quality.json` |
+- Net revenue includes returns. `Return Value` changes the sign of negative
+  return rows for display.
+- Sale orders count distinct sale invoice IDs. Do not use `COUNTROWS` as an
+  order count.
+- The customer score table contains analytical scores only. Its public source
+  has neither contact details nor marketing consent, so
+  `activation_eligible=false` for every row.
+- “Inactivity” means no sale in the next 90 days among customers whose last sale
+  was at most 180 days before the cutoff. It is not contractual churn.
+- Expected revenue is a 90-day regression output. It is not margin, lifetime
+  value, campaign uplift, or ROI.
+- Cohort retention uses `MAX(retention_rate)` in each cohort/month cell. Future
+  cells remain blank; they must not be filled with zero.
 
-The public data does not contain cost, category, brand, contact, or marketing
-consent fields. Do not label revenue as margin, calculate campaign ROI, or use
-the score table as an activation audience. A `.pbix` must be created and
-validated in Power BI Desktop on Windows; this repository does not claim that
-Desktop validation occurred in the Linux build environment.
+## Filter behavior
+
+The date dimension filters transaction facts only. Score visuals use
+`customer_scores[snapshot_date]` as a single-select slicer. Segment filters do
+not intentionally back-filter historical transactions through a bidirectional
+relationship; that would answer an ambiguous “current segment applied to past
+sales” question. If that analysis is later required, implement a documented
+`TREATAS` measure for the specific visual.
+
+## Acceptance criteria
+
+- `Net Revenue`, `Sale Orders`, and `Purchasing Customers` reconcile to the
+  generated HTML dashboard for the unfiltered period.
+- `Data Reconciliation Passed` equals `1`.
+- The model metric cards show AP `0.6534`, ROC-AUC `0.7665`, top-20% lift
+  `1.784×`, and revenue MAE `£588.67` for the delivered UCI run.
+- Selecting a customer segment changes score visuals but does not silently
+  reinterpret historic sales.
+- No visual describes predicted revenue as profit, LTV, or incremental impact.

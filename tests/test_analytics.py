@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -9,7 +10,13 @@ from retailscope.features import attach_labels, snapshot
 from retailscope.identity import resolve
 from retailscope.pipeline import validate_config
 from retailscope.quality import clean_events
-from retailscope.uci import attach_real_labels, real_segment, real_snapshot
+from retailscope.uci import (
+    _model_metrics_mart,
+    _quality_metrics_mart,
+    attach_real_labels,
+    real_segment,
+    real_snapshot,
+)
 
 
 def customer(record, email="a@example.invalid", phone="SYNTH-1", loyalty="", consent=True):
@@ -163,6 +170,36 @@ class UCIAdapterTests(unittest.TestCase):
             "net_revenue_365":range(100,1100,100), "tenure_days":[200]*10})
         result = real_segment(frame)
         self.assertTrue(result.rfm_score.str.fullmatch(r"[1-5]{3}").all())
+
+    def test_powerbi_metric_marts_are_flat_and_complete(self):
+        quality = {
+            "raw_rows": 10, "exact_duplicates_removed": 1, "quarantined_rows": 2,
+            "accepted_rows": 7, "known_customers": 3, "products": 4, "sale_orders": 5,
+            "return_rows": 1, "zero_price_rows_accepted": 0, "reconciled": True,
+            "quarantine_reasons": {"missing_customer_id": 2},
+        }
+        metrics = {
+            "test_classification": {"average_precision": .7, "roc_auc": .8, "lift_at_20pct": 1.5},
+            "test_classification_baseline": {"average_precision": .4, "roc_auc": .5, "lift_at_20pct": 1.0},
+            "test_recency_ranking": {"lift_at_20pct": 1.2},
+            "test_value": {"mae": 500.0}, "test_value_baseline": {"mae": 800.0},
+        }
+        quality_mart = _quality_metrics_mart(quality)
+        model_mart = _model_metrics_mart(metrics)
+        self.assertEqual(set(quality_mart.columns), {"metric", "label", "value", "unit", "status"})
+        self.assertEqual(model_mart.metric.tolist(),
+                         ["average_precision", "roc_auc", "lift_at_20pct", "revenue_mae"])
+        self.assertEqual(model_mart.loc[model_mart.metric.eq("lift_at_20pct"), "baseline"].iloc[0], 1.2)
+        self.assertTrue((model_mart.split == "held_out_test").all())
+
+
+class PowerBIDeliveryTests(unittest.TestCase):
+    def test_contract_validator_accepts_repository_package(self):
+        from scripts.validate_powerbi_contract import validate_package
+
+        root = Path(__file__).resolve().parents[1]
+        errors = validate_package(root / "powerbi" / "model_contract.json", data_root=None)
+        self.assertEqual(errors, [])
 
 
 if __name__ == "__main__":

@@ -31,3 +31,41 @@ IF (
     HASONEVALUE ( customer_scores[snapshot_date] ),
     CALCULATE ( DISTINCTCOUNT ( customer_scores[customer_id] ), customer_scores[inactive_risk90] >= 0.5 )
 )
+
+Average Customer Recency =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), AVERAGE ( customer_scores[recency_days] ) )
+
+Activation-Eligible Customers =
+CALCULATE (
+    DISTINCTCOUNT ( customer_scores[customer_id] ),
+    customer_scores[activation_eligible] = TRUE ()
+)
+
+Held-out Average Precision =
+CALCULATE ( MAX ( model_metrics[value] ), model_metrics[metric] = "average_precision" )
+
+Held-out ROC-AUC =
+CALCULATE ( MAX ( model_metrics[value] ), model_metrics[metric] = "roc_auc" )
+
+Held-out Top-20% Lift =
+CALCULATE ( MAX ( model_metrics[value] ), model_metrics[metric] = "lift_at_20pct" )
+
+Held-out Revenue MAE =
+CALCULATE ( MAX ( model_metrics[value] ), model_metrics[metric] = "revenue_mae" )
+
+Revenue MAE Improvement =
+VAR ModelMAE =
+    CALCULATE ( MAX ( model_metrics[value] ), model_metrics[metric] = "revenue_mae" )
+VAR BaselineMAE =
+    CALCULATE ( MAX ( model_metrics[baseline] ), model_metrics[metric] = "revenue_mae" )
+RETURN
+    DIVIDE ( BaselineMAE - ModelMAE, BaselineMAE )
+
+Accepted Transaction Rows =
+CALCULATE ( MAX ( data_quality_metrics[value] ), data_quality_metrics[metric] = "accepted_rows" )
+
+Quarantined Transaction Rows =
+CALCULATE ( MAX ( data_quality_metrics[value] ), data_quality_metrics[metric] = "quarantined_rows" )
+
+Data Reconciliation Passed =
+CALCULATE ( MAX ( data_quality_metrics[value] ), data_quality_metrics[metric] = "reconciled" )

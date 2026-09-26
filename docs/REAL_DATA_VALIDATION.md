@@ -77,3 +77,17 @@ passed for commit `d6e62b55ef0d642c25c77dae5333608e9e572b1c`.
 This validates SQL syntax, keys, checks, views, column contracts, and transaction
 behavior with a minimal relational fixture. It is not a performance benchmark
 or a claim that all 797,885 accepted events were loaded into SQL Server in CI.
+
+## Power BI delivery validation
+
+The real pipeline publishes eight BI tables, including flat model-evaluation
+and data-quality marts. `powerbi/model_contract.json` defines their ordered CSV
+columns, relationships, DAX measures, theme, and report-page bindings.
+`scripts/validate_powerbi_contract.py` checks the package structure in CI and
+can additionally reconcile every generated CSV header with `--data-root
+outputs/real/marts`.
+
+This validates the reviewable authoring sources, not a rendered report binary.
+Power BI Desktop is unavailable in the Linux build environment; final refresh,
+visual interaction checks, and PBIX/PBIP save remain an explicit Windows
+acceptance step.

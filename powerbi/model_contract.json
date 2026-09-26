@@ -1,0 +1,181 @@
+{
+  "version": "1.0",
+  "title": "RetailScope CRM Analytics",
+  "currency": "GBP",
+  "data_root": "outputs/real/marts",
+  "theme_file": "retailscope_theme.json",
+  "measures_file": "real_measures.dax",
+  "date_table": "dim_date.date",
+  "tables": [
+    {
+      "name": "dim_customer",
+      "file": "dim_customer.csv",
+      "columns": [
+        {"name": "customer_id", "type": "text"},
+        {"name": "country", "type": "text"}
+      ]
+    },
+    {
+      "name": "dim_product",
+      "file": "dim_product.csv",
+      "columns": [
+        {"name": "product_id", "type": "text"},
+        {"name": "product_name", "type": "text"}
+      ]
+    },
+    {
+      "name": "dim_date",
+      "file": "dim_date.csv",
+      "columns": [
+        {"name": "date", "type": "date"},
+        {"name": "year", "type": "integer"},
+        {"name": "month", "type": "integer"},
+        {"name": "year_month", "type": "text"}
+      ]
+    },
+    {
+      "name": "fact_sales",
+      "file": "fact_sales.csv",
+      "columns": [
+        {"name": "event_id", "type": "text"},
+        {"name": "order_id", "type": "text"},
+        {"name": "customer_id", "type": "text"},
+        {"name": "product_id", "type": "text"},
+        {"name": "event_type", "type": "text"},
+        {"name": "signed_quantity", "type": "integer"},
+        {"name": "unit_price", "type": "decimal"},
+        {"name": "net_revenue", "type": "decimal"},
+        {"name": "event_date", "type": "date"}
+      ]
+    },
+    {
+      "name": "customer_scores",
+      "file": "customer_scores.csv",
+      "columns": [
+        {"name": "customer_id", "type": "text"},
+        {"name": "snapshot_date", "type": "date"},
+        {"name": "segment", "type": "text"},
+        {"name": "rfm_score", "type": "text"},
+        {"name": "r_score", "type": "integer"},
+        {"name": "f_score", "type": "integer"},
+        {"name": "m_score", "type": "integer"},
+        {"name": "recency_days", "type": "decimal"},
+        {"name": "frequency_365", "type": "integer"},
+        {"name": "net_revenue_365", "type": "decimal"},
+        {"name": "inactive_risk90", "type": "decimal"},
+        {"name": "expected_revenue90", "type": "decimal"},
+        {"name": "top_product_id", "type": "text"},
+        {"name": "top_product_name", "type": "text"},
+        {"name": "activation_eligible", "type": "logical"},
+        {"name": "activation_exclusion_reason", "type": "text"},
+        {"name": "analysis_priority", "type": "decimal"}
+      ]
+    },
+    {
+      "name": "cohort_retention",
+      "file": "cohort_retention.csv",
+      "columns": [
+        {"name": "cohort", "type": "text"},
+        {"name": "month_index", "type": "integer"},
+        {"name": "cohort_size", "type": "integer"},
+        {"name": "active_customers", "type": "integer"},
+        {"name": "retention_rate", "type": "decimal"}
+      ]
+    },
+    {
+      "name": "data_quality_metrics",
+      "file": "data_quality_metrics.csv",
+      "columns": [
+        {"name": "metric", "type": "text"},
+        {"name": "label", "type": "text"},
+        {"name": "value", "type": "integer"},
+        {"name": "unit", "type": "text"},
+        {"name": "status", "type": "text"}
+      ]
+    },
+    {
+      "name": "model_metrics",
+      "file": "model_metrics.csv",
+      "columns": [
+        {"name": "metric", "type": "text"},
+        {"name": "label", "type": "text"},
+        {"name": "value", "type": "decimal"},
+        {"name": "baseline", "type": "decimal"},
+        {"name": "unit", "type": "text"},
+        {"name": "split", "type": "text"}
+      ]
+    }
+  ],
+  "relationships": [
+    {"from": "fact_sales.customer_id", "to": "dim_customer.customer_id", "cardinality": "many-to-one", "direction": "single"},
+    {"from": "fact_sales.product_id", "to": "dim_product.product_id", "cardinality": "many-to-one", "direction": "single"},
+    {"from": "fact_sales.event_date", "to": "dim_date.date", "cardinality": "many-to-one", "direction": "single"},
+    {"from": "customer_scores.customer_id", "to": "dim_customer.customer_id", "cardinality": "many-to-one", "direction": "single"}
+  ],
+  "measures": [
+    "Net Revenue",
+    "Sale Orders",
+    "Purchasing Customers",
+    "Net Average Order Value",
+    "Return Value",
+    "Gross Sale Value",
+    "Return Value Rate",
+    "Scored Customers",
+    "Average 90D Inactivity Risk",
+    "Expected 90D Revenue",
+    "High-Risk Customers",
+    "Average Customer Recency",
+    "Activation-Eligible Customers",
+    "Held-out Average Precision",
+    "Held-out ROC-AUC",
+    "Held-out Top-20% Lift",
+    "Held-out Revenue MAE",
+    "Revenue MAE Improvement",
+    "Accepted Transaction Rows",
+    "Quarantined Transaction Rows",
+    "Data Reconciliation Passed"
+  ],
+  "pages": [
+    {
+      "name": "Executive Overview",
+      "visuals": [
+        {"type": "card", "title": "Net revenue", "bindings": ["[Net Revenue]"]},
+        {"type": "card", "title": "Sale orders", "bindings": ["[Sale Orders]"]},
+        {"type": "card", "title": "Purchasing customers", "bindings": ["[Purchasing Customers]"]},
+        {"type": "card", "title": "Return value rate", "bindings": ["[Return Value Rate]"]},
+        {"type": "lineChart", "title": "Monthly net revenue", "bindings": ["dim_date.year_month", "[Net Revenue]"]},
+        {"type": "barChart", "title": "Customer segments", "bindings": ["customer_scores.segment", "[Scored Customers]"]}
+      ]
+    },
+    {
+      "name": "Customer Portfolio",
+      "visuals": [
+        {"type": "slicer", "title": "Snapshot", "bindings": ["customer_scores.snapshot_date"]},
+        {"type": "scatterChart", "title": "Recency, value and risk", "bindings": ["customer_scores.recency_days", "customer_scores.net_revenue_365", "customer_scores.inactive_risk90", "customer_scores.customer_id"]},
+        {"type": "barChart", "title": "Segment mix", "bindings": ["customer_scores.segment", "[Scored Customers]"]},
+        {"type": "table", "title": "Customer detail", "bindings": ["customer_scores.customer_id", "customer_scores.segment", "customer_scores.recency_days", "customer_scores.frequency_365", "customer_scores.net_revenue_365", "customer_scores.inactive_risk90"]}
+      ]
+    },
+    {
+      "name": "Risk & Value",
+      "visuals": [
+        {"type": "card", "title": "Average inactivity risk", "bindings": ["[Average 90D Inactivity Risk]"]},
+        {"type": "card", "title": "Expected 90-day revenue", "bindings": ["[Expected 90D Revenue]"]},
+        {"type": "card", "title": "Top-20% lift", "bindings": ["[Held-out Top-20% Lift]"]},
+        {"type": "card", "title": "Revenue MAE improvement", "bindings": ["[Revenue MAE Improvement]"]},
+        {"type": "scatterChart", "title": "Risk-value prioritization", "bindings": ["customer_scores.inactive_risk90", "customer_scores.expected_revenue90", "customer_scores.analysis_priority", "customer_scores.customer_id"]},
+        {"type": "table", "title": "Held-out model metrics", "bindings": ["model_metrics.label", "model_metrics.value", "model_metrics.baseline"]}
+      ]
+    },
+    {
+      "name": "Cohorts & Quality",
+      "visuals": [
+        {"type": "matrix", "title": "Monthly cohort retention", "bindings": ["cohort_retention.cohort", "cohort_retention.month_index", "cohort_retention.retention_rate"]},
+        {"type": "card", "title": "Accepted rows", "bindings": ["[Accepted Transaction Rows]"]},
+        {"type": "card", "title": "Quarantined rows", "bindings": ["[Quarantined Transaction Rows]"]},
+        {"type": "card", "title": "Row reconciliation", "bindings": ["[Data Reconciliation Passed]"]},
+        {"type": "barChart", "title": "Data-quality evidence", "bindings": ["data_quality_metrics.label", "data_quality_metrics.value"]}
+      ]
+    }
+  ]
+}

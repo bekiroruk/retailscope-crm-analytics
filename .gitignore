@@ -7,3 +7,5 @@ outputs/
 *.xlsx
 *.pbix
 *.log
+**/.pbi/localSettings.json
+**/.pbi/cache.abf

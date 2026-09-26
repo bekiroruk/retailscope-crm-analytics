@@ -1,0 +1,19 @@
+{
+  "name": "RetailScope",
+  "dataColors": [
+    "#237F78",
+    "#F28C66",
+    "#E0B04B",
+    "#4C78A8",
+    "#8E6C8A",
+    "#79A873",
+    "#C75D5D",
+    "#71838B"
+  ],
+  "background": "#F6F7F3",
+  "foreground": "#17333D",
+  "tableAccent": "#237F78",
+  "good": "#237F78",
+  "neutral": "#E0B04B",
+  "bad": "#C75D5D"
+}

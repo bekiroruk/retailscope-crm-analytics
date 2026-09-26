@@ -298,6 +298,54 @@ def _write_real_dashboard(path: Path, template: Path, events, scores, products, 
     path.write_text(template.read_text(encoding="utf-8").replace("__REPORT_DATA__", data), encoding="utf-8")
 
 
+def _quality_metrics_mart(quality: dict) -> pd.DataFrame:
+    """Return a flat, BI-friendly view of the data-quality evidence."""
+    definitions = [
+        ("raw_rows", "Raw transaction rows", "rows", "observed"),
+        ("exact_duplicates_removed", "Exact duplicates removed", "rows", "observed"),
+        ("quarantined_rows", "Quarantined rows", "rows", "observed"),
+        ("accepted_rows", "Accepted transaction rows", "rows", "observed"),
+        ("known_customers", "Identified customers", "customers", "observed"),
+        ("products", "Distinct products", "products", "observed"),
+        ("sale_orders", "Sale orders", "orders", "observed"),
+        ("return_rows", "Return rows", "rows", "observed"),
+        ("zero_price_rows_accepted", "Accepted zero-price rows", "rows", "review"),
+        ("reconciled", "Row reconciliation", "boolean", "pass" if quality["reconciled"] else "fail"),
+    ]
+    rows = []
+    for metric, label, unit, status in definitions:
+        value = quality[metric]
+        rows.append({"metric": metric, "label": label, "value": int(value), "unit": unit, "status": status})
+    for reason, value in sorted(quality.get("quarantine_reasons", {}).items()):
+        rows.append({
+            "metric": f"quarantine_{reason}",
+            "label": f"Quarantine: {reason.replace('_', ' ')}",
+            "value": int(value),
+            "unit": "rows",
+            "status": "observed",
+        })
+    return pd.DataFrame(rows)
+
+
+def _model_metrics_mart(metrics: dict) -> pd.DataFrame:
+    """Return held-out metrics and their baselines for dashboard cards."""
+    test_c = metrics["test_classification"]
+    base_c = metrics["test_classification_baseline"]
+    recency = metrics["test_recency_ranking"]
+    test_v = metrics["test_value"]
+    base_v = metrics["test_value_baseline"]
+    rows = [
+        ("average_precision", "Inactivity average precision", test_c["average_precision"],
+         base_c["average_precision"], "ratio"),
+        ("roc_auc", "Inactivity ROC-AUC", test_c["roc_auc"], base_c["roc_auc"], "ratio"),
+        ("lift_at_20pct", "Top-20% lift", test_c["lift_at_20pct"], recency["lift_at_20pct"], "multiple"),
+        ("revenue_mae", "90-day revenue MAE", test_v["mae"], base_v["mae"], "GBP"),
+    ]
+    return pd.DataFrame(rows, columns=["metric", "label", "value", "baseline", "unit"]).assign(
+        split="held_out_test"
+    )
+
+
 def run_uci(root: Path, workbook: Path, config: dict) -> dict:
     output = root / "outputs" / "real"
     marts, reports = output / "marts", output / "reports"
@@ -349,6 +397,8 @@ def run_uci(root: Path, workbook: Path, config: dict) -> dict:
         "fact_sales": fact,
         "customer_scores": scores[score_columns],
         "cohort_retention": cohort_retention(events, config["score_cutoff"]),
+        "data_quality_metrics": _quality_metrics_mart(quality),
+        "model_metrics": _model_metrics_mart(metrics),
     }
     for name, table in tables.items():
         table.to_csv(marts / f"{name}.csv", index=False, encoding="utf-8-sig")
