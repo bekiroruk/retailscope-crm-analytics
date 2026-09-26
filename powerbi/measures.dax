@@ -1,0 +1,48 @@
+// Add each definition as a SEPARATE measure in Power BI Desktop.
+// Table names match outputs/marts/*.csv (remove any automatic CSV suffix).
+Net Ciro = SUM ( fact_sales[net_revenue] )
+
+Brut Kar = SUM ( fact_sales[gross_margin] )
+
+Brut Kar Orani = DIVIDE ( [Brut Kar], [Net Ciro] )
+
+Satis Siparisi =
+CALCULATE ( DISTINCTCOUNT ( fact_sales[order_id] ), fact_sales[event_type] = "sale" )
+
+Alisveris Yapan Musteri =
+CALCULATE ( DISTINCTCOUNT ( fact_sales[customer_id] ), fact_sales[event_type] = "sale" )
+
+Net Ortalama Sepet = DIVIDE ( [Net Ciro], [Satis Siparisi] )
+
+Iade Tutari =
+- CALCULATE ( SUM ( fact_sales[net_revenue] ), fact_sales[event_type] = "return" )
+
+Satis Tutari =
+CALCULATE ( SUM ( fact_sales[net_revenue] ), fact_sales[event_type] = "sale" )
+
+Iade Tutar Orani = DIVIDE ( [Iade Tutari], [Satis Tutari] )
+
+// Recomputed over customers, not an average of precomputed segment percentages.
+Tekrar Alisveris Orani =
+VAR Buyers = FILTER ( VALUES ( dim_customer[customer_id] ), [Satis Siparisi] > 0 )
+VAR RepeatBuyers = FILTER ( Buyers, [Satis Siparisi] >= 2 )
+RETURN DIVIDE ( COUNTROWS ( RepeatBuyers ), COUNTROWS ( Buyers ) )
+
+// Use a single-select snapshot_date slicer. Multiple dates return BLANK to avoid double counting.
+Skorlanan Musteri =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), DISTINCTCOUNT ( customer_scores[customer_id] ) )
+
+Ortalama 90 Gun Risk =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), AVERAGE ( customer_scores[inactive_risk90] ) )
+
+Beklenen 90 Gun Brut Kar =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), SUM ( customer_scores[expected_margin90] ) )
+
+LTV 3 Yil Senaryosu =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), SUM ( customer_scores[ltv_3year_scenario] ) )
+
+Yuksek Risk Musteri =
+IF (
+    HASONEVALUE ( customer_scores[snapshot_date] ),
+    CALCULATE ( DISTINCTCOUNT ( customer_scores[customer_id] ), customer_scores[inactive_risk90] >= 0.5 )
+)
