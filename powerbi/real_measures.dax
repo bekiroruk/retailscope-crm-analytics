@@ -1,0 +1,33 @@
+// Add each definition as a separate measure. Currency is GBP.
+Net Revenue = SUM ( fact_sales[net_revenue] )
+
+Sale Orders =
+CALCULATE ( DISTINCTCOUNT ( fact_sales[order_id] ), fact_sales[event_type] = "sale" )
+
+Purchasing Customers =
+CALCULATE ( DISTINCTCOUNT ( fact_sales[customer_id] ), fact_sales[event_type] = "sale" )
+
+Net Average Order Value = DIVIDE ( [Net Revenue], [Sale Orders] )
+
+Return Value =
+- CALCULATE ( SUM ( fact_sales[net_revenue] ), fact_sales[event_type] = "return" )
+
+Gross Sale Value =
+CALCULATE ( SUM ( fact_sales[net_revenue] ), fact_sales[event_type] = "sale" )
+
+Return Value Rate = DIVIDE ( [Return Value], [Gross Sale Value] )
+
+Scored Customers =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), DISTINCTCOUNT ( customer_scores[customer_id] ) )
+
+Average 90D Inactivity Risk =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), AVERAGE ( customer_scores[inactive_risk90] ) )
+
+Expected 90D Revenue =
+IF ( HASONEVALUE ( customer_scores[snapshot_date] ), SUM ( customer_scores[expected_revenue90] ) )
+
+High-Risk Customers =
+IF (
+    HASONEVALUE ( customer_scores[snapshot_date] ),
+    CALCULATE ( DISTINCTCOUNT ( customer_scores[customer_id] ), customer_scores[inactive_risk90] >= 0.5 )
+)

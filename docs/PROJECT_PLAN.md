@@ -15,8 +15,8 @@ rapor ve ölçülebilir kampanya deneyi birlikte teslim edilir.
 | 2. Kimlik ve veri kalitesi | v0.1 hazır | Tekil müşteri, karantina, denetim tablosu | Tam satır mutabakatı; çakışma sessizce birleştirilmez |
 | 3. Müşteri analitiği | v0.1 hazır | RFM, kanal, kategori/marka/ürün tercihleri, kohort | Hesaplar işlem seviyesine geri izlenebilir |
 | 4. Risk ve değer modeli | v0.1 hazır | Zaman ayrılmış test, baseline, model kartı | Etiket pencereleri tam; gelecek veri özelliğe sızmaz |
-| 5. Raporlama | HTML hazır; BI dosyaları hazır | Filtreli rapor, SQL şeması, DAX | Power BI'da net ciro ve müşteri sayısı Python ile eşleşir |
-| 6. Gerçek veri adaptasyonu | Sıradaki aşama | UCI veya izinli kurum verisi adaptörü | Kaynak/currency/iade/müşteri anlamları korunur |
+| 5. Raporlama | HTML ve BI kaynakları hazır | Filtreli rapor, SQL şeması, DAX | Power BI Desktop eşleştirmesi Windows ortamında bekliyor |
+| 6. Gerçek veri adaptasyonu | v0.2 hazır | UCI adaptörü ve zaman temelli geri test | Kaynak/currency/iade/müşteri anlamları korunur |
 | 7. CRM deneyi | Aday/grup ataması hazır | Deney tasarımı ve sonuç analizi | Etki, maliyet ve belirsizlik birlikte raporlanır |
 | 8. Operasyon | Planlandı | Günlük yükleme, izleme, yeniden eğitim | Veri tazeliği, kimlik sürekliliği, alarm ve geri alma |
 
@@ -31,7 +31,7 @@ rapor ve ölçülebilir kampanya deneyi birlikte teslim edilir.
 | 5 | Gerçek veri adaptörü, yeni geri testler | Sentetik ortamdan gerçek veriye geçiş |
 | 6 | İzleme, otomasyon, GitHub sunumu | Tekrarlanabilir ve yönetilebilir analitik |
 
-Bu süreler öğrenme planı önerisidir; teslim edilen v0.1 için geliştirme süresi beyanı değildir.
+Bu süreler öğrenme planı önerisidir; teslim edilen sürümler için geliştirme süresi beyanı değildir.
 
 ## Gerçek veriye geçişte kararlar
 
@@ -75,4 +75,4 @@ Geciken iade ve geriye dönük düzeltmeler için yeniden hesaplama politikası 
 Kalıcı müşteri anahtar kayıt defteri, izin geçmişi ve SCD2 gerektiğinde eklenmeli.
 Özellik/model kayması, etiket oranı, kalibrasyon ve kohort performansı izlenmeli.
 Yeni model ancak önceki sürüm ve basit modelle ileri tarihli karşılaştırmadan sonra seçilmeli.
-İlk sürümde bu üretim altyapısı kurulmuş değildir.
+Bu üretim altyapısı henüz kurulmuş değildir.

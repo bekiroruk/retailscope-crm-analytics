@@ -9,6 +9,7 @@ from retailscope.features import attach_labels, snapshot
 from retailscope.identity import resolve
 from retailscope.pipeline import validate_config
 from retailscope.quality import clean_events
+from retailscope.uci import attach_real_labels, real_segment, real_snapshot
 
 
 def customer(record, email="a@example.invalid", phone="SYNTH-1", loyalty="", consent=True):
@@ -128,6 +129,40 @@ class CRMTests(unittest.TestCase):
     def test_ltv_zero_retention_has_only_first_discounted_period(self):
         result=ltv_scenario([100], retention=0, quarterly_discount=.1, quarters=12)
         self.assertAlmostEqual(float(result[0]), 100/1.1)
+
+
+class UCIAdapterTests(unittest.TestCase):
+    def setUp(self):
+        self.events = pd.DataFrame([
+            dict(event_id="1", order_id="A", customer_id="UCI-1", product_id="P1", product_name="One",
+                 country="United Kingdom", event_time=pd.Timestamp("2010-01-01"), event_type="sale",
+                 signed_quantity=2, unit_price=10., net_revenue=20.),
+            dict(event_id="2", order_id="B", customer_id="UCI-1", product_id="P2", product_name="Two",
+                 country="United Kingdom", event_time=pd.Timestamp("2010-03-01"), event_type="sale",
+                 signed_quantity=1, unit_price=15., net_revenue=15.),
+            dict(event_id="3", order_id="C", customer_id="UCI-1", product_id="P2", product_name="Two",
+                 country="United Kingdom", event_time=pd.Timestamp("2010-04-03"), event_type="return",
+                 signed_quantity=-1, unit_price=15., net_revenue=-15.),
+        ])
+
+    def test_real_features_stop_at_cutoff(self):
+        before = real_snapshot(self.events, "2010-04-01")
+        future = pd.concat([self.events, pd.DataFrame([dict(self.events.iloc[0], event_id="4", order_id="D",
+            event_time=pd.Timestamp("2010-04-02"), signed_quantity=99, net_revenue=990.)])], ignore_index=True)
+        assert_frame_equal(before, real_snapshot(future, "2010-04-01"))
+
+    def test_returns_reduce_revenue_but_not_inactivity(self):
+        labeled = attach_real_labels(real_snapshot(self.events, "2010-04-01"), self.events,
+                                     "2010-04-01", "2010-07-01")
+        self.assertEqual(labeled.inactive_next90.iloc[0], 1)
+        self.assertEqual(labeled.revenue_next90.iloc[0], -15.)
+
+    def test_real_segmentation_outputs_valid_scores(self):
+        frame = pd.DataFrame({"customer_id":[f"C{i}" for i in range(10)],
+            "recency_days":range(10), "frequency_365":range(1,11),
+            "net_revenue_365":range(100,1100,100), "tenure_days":[200]*10})
+        result = real_segment(frame)
+        self.assertTrue(result.rfm_score.str.fullmatch(r"[1-5]{3}").all())
 
 
 if __name__ == "__main__":

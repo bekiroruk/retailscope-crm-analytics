@@ -1,17 +1,10 @@
 # Kaynaklar ve veri stratejisi
 
-Kaynaklar 18 Eylül 2026 tarihinde kontrol edildi. Bağlantılar teknik tasarımı ve sonraki veri aşamasını destekler.
+Kaynaklar 26 Eylül 2026 tarihinde kontrol edildi.
 
-## 1. Mevcut veri: tamamen sentetik
+## 1. Gerçek veri: UCI Online Retail II
 
-İlk sürümde yalnızca `retailscope/synthetic.py` ile üretilen veri kullanıldı.
-Gerçek kişiler, ebebek ürün veritabanı, satış verileri veya kampanya sonuçları kullanılmadı.
-E-posta adresleri example.invalid alanında, telefonlar SYNTH belirteci şeklindedir.
-Veri seti sabit tohumla yeniden üretilebilir. UCI verisi indirilmemiş ve projeye dahil edilmemiştir.
-
-## 2. Gerçek veriyle ikinci aşama
-
-[UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii)
+[UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online%2Bretail%2Bii)
 iki yıllık Birleşik Krallık çevrimiçi perakende işlemlerini içerir.
 Kaynakta 1.067.371 kayıt, eksik değerler ve GBP birim fiyat bilgisi tanımlanır.
 CC BY 4.0 lisanslıdır; atıf korunmalıdır. Anne-bebek mağazası verisi değildir.
@@ -19,9 +12,20 @@ CC BY 4.0 lisanslıdır; atıf korunmalıdır. Anne-bebek mağazası verisi değ
 Atıf: Chen, D. (2012). *Online Retail II [Dataset]*. UCI Machine Learning Repository.
 DOI: https://doi.org/10.24432/C5CG6D.
 
-İlk kullanım amacı: sipariş/iade temizliği, RFM, kohort ve sonraki 90 gün net harcama geri testi.
-Maliyet ve izin gibi kaynakta bulunmayan alanlar gerçek gözlem gibi doldurulmayacak.
-Dosyanın adaptörü ve yeni dönem konfigürasyonu sonraki geliştirme aşamasıdır.
+`retailscope/uci.py` iki çalışma sayfasını birleştirir; tam tekrarları ayırır,
+müşteri kimliği bulunmayan satırları müşteri modelinden karantinaya alır ve
+zaman temelli RFM/risk/gelir analizini çalıştırır. Kaynakta bulunmayan maliyet,
+kategori, marka, iletişim ve izin alanları uydurulmaz. Ham çalışma kitabı ve
+üretilen çıktılar lisans/boyut nedeniyle Git'e eklenmez; indirme betiği resmî
+kaynağı kullanır ve SHA-256 doğrulaması yapar.
+
+## 2. Sentetik referans veri
+
+`retailscope/synthetic.py` ile üretilen veri kimlik çözümleme, izin kontrollü
+kampanya tasarımı ve brüt kâr senaryolarını göstermek için korunur. Gerçek kişi,
+ebebek ürünü, şirket satışı veya kampanya sonucu içermez. E-posta adresleri
+`example.invalid`, telefonlar `SYNTH` belirteci kullanır ve veri sabit tohumla
+yeniden üretilebilir.
 
 ## 3. Tasarım kaynakları
 

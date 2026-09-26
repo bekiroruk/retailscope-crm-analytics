@@ -12,3 +12,33 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: python -m unittest discover -s tests -v
       - run: python -m retailscope all
+  sqlserver-smoke:
+    runs-on: ubuntu-24.04
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "RetailScope!2026_Test"
+        ports:
+          - 1433:1433
+    env:
+      RETAILSCOPE_MASTER_ODBC: "DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost,1433;DATABASE=master;UID=sa;PWD=RetailScope!2026_Test;Encrypt=yes;TrustServerCertificate=yes"
+      RETAILSCOPE_ODBC: "DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost,1433;DATABASE=RetailScopeCI;UID=sa;PWD=RetailScope!2026_Test;Encrypt=yes;TrustServerCertificate=yes"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install Microsoft ODBC Driver 18
+        run: |
+          curl -sSL -O "https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb"
+          sudo dpkg -i packages-microsoft-prod.deb
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
+      - run: python -m pip install -r requirements-sqlserver.txt
+      - run: python scripts/create_uci_sql_smoke_data.py
+      - run: python scripts/sqlserver_ci_smoke.py prepare
+      - run: python scripts/load_sqlserver_uci.py
+      - run: python scripts/sqlserver_ci_smoke.py verify

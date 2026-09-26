@@ -1,111 +1,126 @@
 # RetailScope
 
-RetailScope is a reproducible retail CRM analytics project covering customer identity resolution, RFM segmentation, 90-day inactivity risk, customer value estimation, campaign targeting, SQL Server integration, and Power BI-ready data marts.
+RetailScope is an end-to-end CRM analytics case study for retail: data quality,
+customer segmentation, 90-day inactivity risk, revenue forecasting, SQL Server
+delivery, and Power BI-ready marts.
 
-The project uses fully synthetic data. It contains no real customer records, company data, or measured campaign outcomes.
+The primary track now runs on the real **UCI Online Retail II** transaction
+dataset. A deterministic synthetic track remains available for identity
+resolution, consent-aware campaign design, and gross-margin scenarios.
 
-## What it delivers
+![RetailScope real-data dashboard overview](docs/assets/uci-dashboard-overview.jpg)
 
-| Capability | Output |
+## What this project demonstrates
+
+| Area | Implementation |
 |---|---|
-| Customer identity resolution | Conservative record linkage with match rules and review flags |
-| Data quality | Duplicate control, quarantine reasons, return validation, row reconciliation |
-| Customer analytics | RFM segments, channel behavior, category, brand, and product affinity |
-| Risk modeling | Probability of no purchase in the next 90 days |
-| Customer value | 90-day gross-margin forecast and an explicit three-year LTV scenario |
-| CRM activation | Ranked candidates with deterministic treatment/control assignment |
-| Reporting | Self-contained interactive HTML dashboard and Power BI-ready tables |
-| Data platform | SQL Server schema, views, ad-hoc queries, and transactional loader |
+| Data engineering | Two-sheet Excel adapter, schema checks, deduplication, quarantine, row reconciliation |
+| Customer analytics | RFM segments, recency/frequency/value features, product affinity, cohorts |
+| Risk modeling | 90-day no-purchase probability with chronological validation and held-out testing |
+| Value modeling | Next-90-day net-revenue regression with a mean baseline |
+| Responsible CRM | Consent/contact absence blocks activation; no uplift or ROI claim |
+| BI delivery | Star-schema CSV marts, SQL Server DDL/loaders, DAX measures, offline HTML dashboard |
+| Quality assurance | Leakage, accounting, identity, segmentation, and targeting tests |
 
-## Analytics workflow
+## Real-data result
 
-`Synthetic events → identity resolution → validation and quarantine → time-based features → model selection → held-out evaluation → CRM scores → reporting`
+Source: [UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online%2Bretail%2Bii),
+CC BY 4.0, DOI `10.24432/C5CG6D`.
 
-The feature window ends before the prediction cutoff. Training, validation, and test outcome windows do not overlap. Model selection uses validation data; the test period is reserved for final reporting.
-
-## Validation snapshot
-
-Results below come from the deterministic synthetic run with seed `42`.
-
-| Metric | Result |
+| Measure | Result |
 |---|---:|
-| Source customer records | 2,266 |
-| Unified customers | 1,800 |
-| Accepted transaction events | 81,489 |
-| Quarantined events | 2 |
-| Scored customers | 1,368 |
-| Automated tests | 14 passed |
-| Test customers | 1,499 |
-| Inactivity Average Precision | 0.7300 |
-| Inactivity ROC-AUC | 0.8727 |
-| Top-20% lift | 3.259× |
-| 90-day value MAE | 1,706.12 TRY |
+| Raw transaction rows | 1,067,371 |
+| Accepted events | 797,885 |
+| Identified customers | 5,942 |
+| Customers scored at 2011-12-10 | 3,478 |
+| Held-out test customers | 2,772 |
+| Inactivity Average Precision | 0.6534 |
+| Inactivity ROC-AUC | 0.7665 |
+| Top-20% lift | 1.784× |
+| 90-day revenue MAE | £588.67 |
+| Mean-baseline revenue MAE | £845.93 |
+| Automated tests | 17 passed |
 
-The value model has a WAPE of 73.93% and an aggregate positive bias of approximately 29.3%. It is therefore a portfolio baseline, not a production budgeting model. Full evidence and limitations are recorded in [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md).
+Features stop at each cutoff; labels use the following 90 days. Training,
+validation, and test outcome windows do not overlap. Model selection uses only
+the validation period, and the September 2011 test period is reserved for final
+reporting. Full evidence is in
+[`docs/REAL_DATA_VALIDATION.md`](docs/REAL_DATA_VALIDATION.md).
 
 ## Quick start
 
 Requirements: Python 3.12. GPU is not required.
 
-### Windows PowerShell
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m retailscope all
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-Start-Process .\outputs\reports\dashboard.html
+```bash
+python -m venv .venv
+source .venv/bin/activate              # Windows: .venv\Scripts\activate
+python -m pip install -r requirements.txt
+python scripts/download_uci.py
+python -m retailscope uci --input data/raw/online_retail_II.xlsx
+python -m unittest discover -s tests -v
 ```
 
-### Linux or macOS
+Open `outputs/real/reports/dashboard.html` for the interactive local report.
+Generated source data and outputs are intentionally excluded from Git.
+
+The synthetic reference pipeline is still reproducible:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m retailscope all
-.venv/bin/python -m unittest discover -s tests -v
+python -m retailscope all
 ```
 
-The pipeline writes generated source data to `data/` and derived artifacts to `outputs/`. Both directories are excluded from Git because they are reproducible.
-
-## Repository structure
+## Architecture
 
 ```text
-retailscope/       Analytics package: generation, identity, quality, features, models, CRM, reports
-tests/             Identity, accounting, temporal leakage, and targeting tests
-sql/               SQL Server schema, views, and analysis queries
-powerbi/           Data model instructions and DAX measures
-templates/         Offline HTML dashboard template
-scripts/           Windows runner and optional SQL Server loader
-docs/              Data dictionary, model card, validation record, sources, and project plan
+UCI workbook
+  -> schema validation, deduplication, quarantine
+  -> leakage-safe customer snapshots and labels
+  -> validation-based model selection
+  -> held-out temporal evaluation
+  -> customer scores, cohorts and product affinity
+  -> HTML dashboard / CSV marts / SQL Server / Power BI
 ```
 
 ## SQL Server and Power BI
 
-The Python pipeline is executable and tested. SQL Server and Power BI assets are implementation-ready but have not been executed in a live SQL Server instance or validated in Power BI Desktop.
+- [`sql/uci_schema.sql`](sql/uci_schema.sql) creates a non-destructive
+  `retailscope_uci` star schema with keys, checks, indexes, and views.
+- [`scripts/load_sqlserver_uci.py`](scripts/load_sqlserver_uci.py) validates CSV
+  columns and loads five tables in one transaction. It refuses system databases
+  and populated targets.
+- [`powerbi/REAL_DATA_GUIDE.md`](powerbi/REAL_DATA_GUIDE.md) defines the model,
+  relationships, pages, types, and refresh behavior.
+- [`powerbi/real_measures.dax`](powerbi/real_measures.dax) provides GBP-aware
+  measures for revenue, orders, returns, risk, and expected revenue.
 
-- [`sql/schema.sql`](sql/schema.sql) defines the star-schema tables, keys, indexes, and views.
-- [`scripts/load_sqlserver.py`](scripts/load_sqlserver.py) loads five empty target tables in a single transaction and refuses destructive overwrite.
-- [`powerbi/README.md`](powerbi/README.md) documents relationships, data types, pages, and refresh behavior.
-- [`powerbi/measures.dax`](powerbi/measures.dax) contains the report measures.
+SQL Server and Power BI Desktop are not available in the Linux build
+environment. The DDL, loader, CSV contracts, and DAX assets are validated here;
+a live SQL Server connection and `.pbix` visual validation must be performed in
+an environment that provides those products. No unverified `.pbix` binary is
+committed.
 
-## Documentation
+## Repository map
 
-- [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md) — table grains, field definitions, and accounting rules
-- [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) — population, temporal design, metrics, limitations, and LTV assumptions
-- [`docs/VALIDATION.md`](docs/VALIDATION.md) — executed checks and measured synthetic results
-- [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) — path from synthetic prototype to real-data validation
-- [`docs/SOURCES.md`](docs/SOURCES.md) — data strategy and technical references
+```text
+retailscope/       Synthetic and real-data analytics pipelines
+tests/             Leakage, accounting, identity, CRM and UCI adapter tests
+sql/               SQL Server schemas and analysis queries
+powerbi/           Model guides and DAX measures
+templates/         Self-contained offline dashboards
+scripts/           Data download, rendering and SQL Server loaders
+docs/              Validation records, model cards and data documentation
+```
 
-## Scope and responsible use
+## Interpretation limits
 
-- The inactivity target means **no sale in the next 90 days**; it is not contractual churn or proven brand abandonment.
-- Current consent is used only as a campaign eligibility rule, never as a model feature.
-- High predicted risk does not imply positive campaign uplift. A randomized experiment is required to estimate incremental impact.
-- The generated treatment/control split is an experiment plan. No communication is sent and no ROI is claimed.
-- Identity hashes are not an anonymization guarantee. A production implementation needs governed identifiers, consent history, and merge lineage.
-- Product prices, costs, customers, brands, and transactions are fictional and must not be interpreted as results from any retailer.
+- “Inactivity” means no sale in the next 90 days, not contractual churn.
+- UCI provides revenue but no cost; predicted revenue is not margin, LTV, or ROI.
+- UCI provides no consent or contact data; every real-data score is marked
+  `activation_eligible=false`.
+- Predicted risk does not imply campaign uplift. Incremental impact requires a
+  randomized experiment.
+- The 2009–2011 UK retailer population may not generalize to present-day Turkey,
+  baby retail, or ebebek.
 
-## Status
-
-Version `0.1.0` is a tested synthetic reference implementation. The next milestone is a validated real-data adapter followed by repeated time-based backtests and a Power BI Desktop implementation.
+The synthetic data contains no real customer or company records. This project
+is independent and is not an ebebek production system.
