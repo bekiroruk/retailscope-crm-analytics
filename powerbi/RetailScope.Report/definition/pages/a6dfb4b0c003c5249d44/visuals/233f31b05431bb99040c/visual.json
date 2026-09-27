@@ -1,0 +1,111 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "233f31b05431bb99040c",
+  "position": {
+    "x": 493.90812720848055,
+    "y": 595.22261484098942,
+    "z": 8000,
+    "height": 124.8339222614841,
+    "width": 294.89752650176678,
+    "tabOrder": 8000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "model_metrics"
+                    }
+                  },
+                  "Property": "label"
+                }
+              },
+              "queryRef": "model_metrics.label",
+              "nativeQueryRef": "Metric",
+              "displayName": "Metric"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "model_metrics"
+                        }
+                      },
+                      "Property": "value"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(model_metrics.value)",
+              "nativeQueryRef": "Model",
+              "displayName": "Model"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "model_metrics"
+                        }
+                      },
+                      "Property": "baseline"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(model_metrics.baseline)",
+              "nativeQueryRef": "Baseline",
+              "displayName": "Baseline"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "model_metrics"
+                  }
+                },
+                "Property": "label"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

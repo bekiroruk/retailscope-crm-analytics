@@ -1,0 +1,61 @@
+table data_quality_metrics
+	lineageTag: 911561f7-faaf-4d4b-abdc-4bd4838ace92
+
+	column metric
+		dataType: string
+		lineageTag: dd1af8ac-cb62-4680-854d-33632bb83fdf
+		summarizeBy: none
+		sourceColumn: metric
+
+		annotation SummarizationSetBy = Automatic
+
+	column label
+		dataType: string
+		lineageTag: 7e5f429d-03e4-476c-b3ec-c6766bf24f8c
+		summarizeBy: none
+		sourceColumn: label
+
+		annotation SummarizationSetBy = Automatic
+
+	column value
+		dataType: int64
+		formatString: 0
+		lineageTag: e6367ad5-20ee-4bdd-bd90-c0d68676eb10
+		summarizeBy: sum
+		sourceColumn: value
+
+		annotation SummarizationSetBy = Automatic
+
+	column unit
+		dataType: string
+		lineageTag: 8385f7cb-93b4-41c1-a8b7-bf207a39e311
+		summarizeBy: none
+		sourceColumn: unit
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: 4092d41d-8512-420b-879b-194bdeff4ffa
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	partition data_quality_metrics = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(Text.Combine({DataRoot, "data_quality_metrics.csv"}, "\")), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {
+				        {"metric", type text}, {"label", type text}, {"value", Int64.Type},
+				        {"unit", type text}, {"status", type text}
+				    }, "en-US")
+				in
+				    Typed
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

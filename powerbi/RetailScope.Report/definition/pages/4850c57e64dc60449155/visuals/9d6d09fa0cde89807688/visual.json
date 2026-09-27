@@ -1,0 +1,187 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "9d6d09fa0cde89807688",
+  "position": {
+    "x": 298.05486284289276,
+    "y": 386.03491271820445,
+    "z": 4000,
+    "height": 316.00997506234415,
+    "width": 684.08977556109721,
+    "tabOrder": 4000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "customer_scores"
+                    }
+                  },
+                  "Property": "customer_id"
+                }
+              },
+              "queryRef": "customer_scores.customer_id",
+              "nativeQueryRef": "Customer ID",
+              "displayName": "Customer ID"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "customer_scores"
+                    }
+                  },
+                  "Property": "segment"
+                }
+              },
+              "queryRef": "customer_scores.segment",
+              "nativeQueryRef": "Segment",
+              "displayName": "Segment"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "recency_days"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.recency_days)",
+              "nativeQueryRef": "Recency (Days)",
+              "displayName": "Recency (Days)"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "frequency_365"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.frequency_365)",
+              "nativeQueryRef": "Orders (365D)",
+              "displayName": "Orders (365D)"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "net_revenue_365"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.net_revenue_365)",
+              "nativeQueryRef": "Net Revenue (365D)",
+              "displayName": "Net Revenue (365D)"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "inactive_risk90"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.inactive_risk90)",
+              "nativeQueryRef": "Inactivity Risk",
+              "displayName": "Inactivity Risk"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "customer_scores"
+                      }
+                    },
+                    "Property": "inactive_risk90"
+                  }
+                },
+                "Function": 0
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "167.94514640771882D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "customer_scores.segment"
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

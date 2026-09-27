@@ -1,0 +1,23 @@
+relationship 3c7d2da4-86f9-46bd-b515-b03954579671
+	joinOnDateBehavior: datePartOnly
+	fromColumn: customer_scores.snapshot_date
+	toColumn: LocalDateTable_c98eeee9-06a0-4c9e-b28d-1c7ca89ba0e5.Date
+
+relationship AutoDetected_86bf1b1a-4716-4e13-a7d2-7f69ef2a3559
+	fromColumn: fact_sales.customer_id
+	toColumn: dim_customer.customer_id
+
+relationship AutoDetected_2a49843a-1028-49f2-ac2a-5e0b9435456a
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: customer_scores.customer_id
+	toColumn: dim_customer.customer_id
+
+relationship AutoDetected_1de99933-2337-4a91-92bb-2bd48b68f784
+	fromColumn: fact_sales.product_id
+	toColumn: dim_product.product_id
+
+relationship ae1e77ed-5341-e600-8b9d-23a4821a834d
+	fromColumn: fact_sales.event_date
+	toColumn: dim_date.date
+

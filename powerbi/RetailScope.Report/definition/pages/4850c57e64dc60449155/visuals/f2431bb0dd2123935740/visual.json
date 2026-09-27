@@ -1,0 +1,210 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "f2431bb0dd2123935740",
+  "position": {
+    "x": 624,
+    "y": 104,
+    "z": 3000,
+    "height": 282,
+    "width": 656,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "scatterChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "customer_scores"
+                    }
+                  },
+                  "Property": "customer_id"
+                }
+              },
+              "queryRef": "customer_scores.customer_id",
+              "nativeQueryRef": "customer_id",
+              "active": true
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "segment"
+                    }
+                  },
+                  "Function": 3
+                }
+              },
+              "queryRef": "Min(customer_scores.segment)",
+              "nativeQueryRef": "First segment"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "inactive_risk90"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.inactive_risk90)",
+              "nativeQueryRef": "Sum of inactive_risk90"
+            }
+          ]
+        },
+        "X": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "recency_days"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.recency_days)",
+              "nativeQueryRef": "Sum of recency_days",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "net_revenue_365"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.net_revenue_365)",
+              "nativeQueryRef": "Sum of net_revenue_365"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "dataPoint": [
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "FillRule": {
+                      "Input": {
+                        "Aggregation": {
+                          "Expression": {
+                            "Column": {
+                              "Expression": {
+                                "SourceRef": {
+                                  "Entity": "customer_scores"
+                                }
+                              },
+                              "Property": "inactive_risk90"
+                            }
+                          },
+                          "Function": 1
+                        }
+                      },
+                      "FillRule": {
+                        "linearGradient2": {
+                          "min": {
+                            "color": {
+                              "Literal": {
+                                "Value": "'#237F78'"
+                              }
+                            }
+                          },
+                          "max": {
+                            "color": {
+                              "Literal": {
+                                "Value": "'#C75D5D'"
+                              }
+                            }
+                          },
+                          "nullColoringStrategy": {
+                            "strategy": {
+                              "Literal": {
+                                "Value": "'asZero'"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "dataViewWildcard": {
+                  "matchingOption": 1
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Customer recency vs 365-day net revenue'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

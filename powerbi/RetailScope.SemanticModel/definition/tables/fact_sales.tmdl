@@ -1,0 +1,307 @@
+table fact_sales
+	lineageTag: 142de815-ac04-4246-a87f-effb6f8eed9f
+
+	measure 'Net Revenue' = SUM(fact_sales[net_revenue])
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 3de51cee-7a16-4e63-95dc-a93d8a15be18
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure 'Sale Orders' =
+			
+			CALCULATE (
+			    DISTINCTCOUNT ( fact_sales[order_id] ),
+			    fact_sales[event_type] = "sale"
+			)
+		formatString: 0
+		lineageTag: 4f45d13d-6dcf-49fd-b09f-61fe501e33a2
+
+	measure 'Purchasing Customers' =
+			
+			CALCULATE (
+			    DISTINCTCOUNT ( fact_sales[customer_id] ),
+			    fact_sales[event_type] = "sale"
+			)
+		formatString: 0
+		lineageTag: 67d7b458-6087-4547-8b8a-3b7e32f6d192
+
+	measure 'Net Average Order Value' =
+			
+			DIVIDE ( [Net Revenue], [Sale Orders] )
+		formatString: "₺"#,0.###############;-"₺"#,0.###############;"₺"#,0.###############
+		lineageTag: a18e32f5-d26a-4f6d-b233-2a36ab8c9b80
+
+		annotation PBI_FormatHint = {"currencyCulture":"tr-TR"}
+
+	measure 'Return Value' =
+			
+			- CALCULATE (
+			    SUM ( fact_sales[net_revenue] ),
+			    fact_sales[event_type] = "return"
+			)
+		formatString: "₺"#,0.###############;-"₺"#,0.###############;"₺"#,0.###############
+		lineageTag: 8867bf04-d164-4bf7-b6c8-f21dfddfda0c
+
+		annotation PBI_FormatHint = {"currencyCulture":"tr-TR"}
+
+	measure 'Gross Sale Value' =
+			
+			CALCULATE (
+			    SUM ( fact_sales[net_revenue] ),
+			    fact_sales[event_type] = "sale"
+			)
+		formatString: "₺"#,0.###############;-"₺"#,0.###############;"₺"#,0.###############
+		lineageTag: a15fed45-17da-45f1-bf3f-13e50652dfc1
+
+		annotation PBI_FormatHint = {"currencyCulture":"tr-TR"}
+
+	measure 'Return Value Rate' =
+			
+			DIVIDE ( [Return Value], [Gross Sale Value] )
+		formatString: %0.0;-%0.0;%0.0
+		lineageTag: 72a6ac21-b44e-4382-a1b8-bff99dca0d4a
+
+	measure 'Scored Customers' =
+			
+			IF (
+			    HASONEVALUE ( customer_scores[snapshot_date] ),
+			    DISTINCTCOUNT ( customer_scores[customer_id] )
+			)
+		formatString: 0
+		lineageTag: 17d7d3f9-294c-4a57-b3b7-6a20357843b1
+
+	measure 'Average 90D Inactivity Risk' =
+			
+			IF (
+			    HASONEVALUE ( customer_scores[snapshot_date] ),
+			    AVERAGE ( customer_scores[inactive_risk90] )
+			)
+		formatString: %0.0;-%0.0;%0.0
+		lineageTag: 55bacc6f-19f3-412b-b1b2-5a77de5dc16d
+
+	measure 'Expected 90D Revenue' =
+			
+			IF (
+			    HASONEVALUE ( customer_scores[snapshot_date] ),
+			    SUM ( customer_scores[expected_revenue90] )
+			)
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 5cf3ad42-b96d-42b3-aff4-9b955488a296
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure 'High-Risk Customers' =
+			
+			IF (
+			    HASONEVALUE ( customer_scores[snapshot_date] ),
+			    CALCULATE (
+			        DISTINCTCOUNT ( customer_scores[customer_id] ),
+			        customer_scores[inactive_risk90] >= 0.5
+			    )
+			)
+		formatString: 0
+		lineageTag: d130323f-335a-4eac-962c-1a5a84cd6f13
+
+	measure 'Average Customer Recency' =
+			
+			IF (
+			    HASONEVALUE ( customer_scores[snapshot_date] ),
+			    AVERAGE ( customer_scores[recency_days] )
+			)
+		lineageTag: fd5ecf62-ef5d-4606-b422-156acfe1a7e6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Activation-Eligible Customers' =
+			
+			CALCULATE (
+			    DISTINCTCOUNT ( customer_scores[customer_id] ),
+			    customer_scores[activation_eligible] = TRUE ()
+			)
+		formatString: 0
+		lineageTag: 354e032d-4a3a-4f06-8ae6-362cd6e45576
+
+	measure 'Held-out Average Precision' =
+			
+			CALCULATE (
+			    MAX ( model_metrics[value] ),
+			    model_metrics[metric] = "average_precision"
+			)
+		lineageTag: a5aa280f-97ea-48d1-aca3-279c7d44d168
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Held-out ROC-AUC' =
+			
+			CALCULATE (
+			    MAX ( model_metrics[value] ),
+			    model_metrics[metric] = "roc_auc"
+			)
+		lineageTag: b5a70788-8821-4f9c-ad0c-ee5c75675aaa
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Held-out Top-20% Lift' =
+			
+			CALCULATE (
+			    MAX ( model_metrics[value] ),
+			    model_metrics[metric] = "lift_at_20pct"
+			)
+		lineageTag: 1da304fc-e3ee-4aa0-b647-2437b4a629d0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Held-out Revenue MAE' =
+			
+			CALCULATE (
+			    MAX ( model_metrics[value] ),
+			    model_metrics[metric] = "revenue_mae"
+			)
+		lineageTag: 99402e19-14cd-4b1b-9783-9390dea5e666
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Revenue MAE Improvement' =
+			
+			VAR ModelMAE =
+			    CALCULATE (
+			        MAX ( model_metrics[value] ),
+			        model_metrics[metric] = "revenue_mae"
+			    )
+			VAR BaselineMAE =
+			    CALCULATE (
+			        MAX ( model_metrics[baseline] ),
+			        model_metrics[metric] = "revenue_mae"
+			    )
+			RETURN
+			    DIVIDE ( BaselineMAE - ModelMAE, BaselineMAE )
+		formatString: %0.0;-%0.0;%0.0
+		lineageTag: 68f81a92-8057-4697-b12c-df671abded47
+
+	measure 'Accepted Transaction Rows' =
+			
+			CALCULATE (
+			    MAX ( data_quality_metrics[value] ),
+			    data_quality_metrics[metric] = "accepted_rows"
+			)
+		formatString: 0
+		lineageTag: 687149e9-ebb7-45bc-8e6c-891f0baf6e3b
+
+	measure 'Quarantined Transaction Rows' =
+			
+			CALCULATE (
+			    MAX ( data_quality_metrics[value] ),
+			    data_quality_metrics[metric] = "quarantined_rows"
+			)
+		formatString: 0
+		lineageTag: 07860d8c-8c1d-4eda-8e26-089798104057
+
+	measure 'Data Reconciliation Passed' =
+			
+			CALCULATE (
+			    MAX ( data_quality_metrics[value] ),
+			    data_quality_metrics[metric] = "reconciled"
+			)
+		formatString: 0
+		lineageTag: f7300374-49a2-4313-aaa4-c07daa768468
+
+	column event_id
+		dataType: string
+		lineageTag: 6bc022e7-9ad2-4f87-bc0a-670fda365b3a
+		summarizeBy: none
+		sourceColumn: event_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_id
+		dataType: string
+		lineageTag: 5cb7fa2a-6af0-4a4b-984c-582255928611
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_id
+		dataType: string
+		lineageTag: 7a3b03a4-3318-42a9-a65b-15e49fb054b0
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_id
+		dataType: string
+		lineageTag: b4c2ddf1-8299-4922-bd0f-e06363d71547
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column event_type
+		dataType: string
+		lineageTag: b1d35db4-32e8-4ced-9a3a-7317824a0e5e
+		summarizeBy: none
+		sourceColumn: event_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column signed_quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 2b3f4764-57cc-4b27-86a3-d3878ab56c75
+		summarizeBy: sum
+		sourceColumn: signed_quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column unit_price
+		dataType: decimal
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 91072594-fdd3-4551-b276-8c1f4698cfe7
+		summarizeBy: sum
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	column net_revenue
+		dataType: decimal
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 363ecede-55df-4169-8785-f6115a3b79e7
+		summarizeBy: sum
+		sourceColumn: net_revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	column event_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 54d73036-2d49-4cb8-bed6-65c71ab7eeee
+		summarizeBy: none
+		sourceColumn: event_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition fact_sales = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(Text.Combine({DataRoot, "fact_sales.csv"}, "\")), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {
+				        {"event_id", type text}, {"order_id", type text}, {"customer_id", type text},
+				        {"product_id", type text}, {"event_type", type text}, {"signed_quantity", Int64.Type},
+				        {"unit_price", Currency.Type}, {"net_revenue", Currency.Type}, {"event_date", type date}
+				    }, "en-US")
+				in
+				    Typed
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

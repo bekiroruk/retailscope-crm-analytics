@@ -1,0 +1,72 @@
+table model_metrics
+	lineageTag: 6877461d-8dc9-437c-9956-b743c8fa51fe
+
+	column metric
+		dataType: string
+		lineageTag: b8662f4f-a571-4540-8590-0f407f2cda77
+		summarizeBy: none
+		sourceColumn: metric
+
+		annotation SummarizationSetBy = Automatic
+
+	column label
+		dataType: string
+		lineageTag: 6f67f56d-86dc-4ce0-99eb-5f532a2d6600
+		summarizeBy: none
+		sourceColumn: label
+
+		annotation SummarizationSetBy = Automatic
+
+	column value
+		dataType: double
+		lineageTag: 37e24f6d-716b-489b-bfbb-e1e566f99327
+		summarizeBy: sum
+		sourceColumn: value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column baseline
+		dataType: double
+		lineageTag: 3b5f4edc-af15-43a4-bdfe-3f3a8166792e
+		summarizeBy: sum
+		sourceColumn: baseline
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column unit
+		dataType: string
+		lineageTag: 213dc852-6952-499d-9937-aadfe66b1b94
+		summarizeBy: none
+		sourceColumn: unit
+
+		annotation SummarizationSetBy = Automatic
+
+	column split
+		dataType: string
+		lineageTag: 87796bc5-a815-4336-88e7-1dd812416caa
+		summarizeBy: none
+		sourceColumn: split
+
+		annotation SummarizationSetBy = Automatic
+
+	partition model_metrics = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(Text.Combine({DataRoot, "model_metrics.csv"}, "\")), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {
+				        {"metric", type text}, {"label", type text}, {"value", type number},
+				        {"baseline", type number}, {"unit", type text}, {"split", type text}
+				    }, "en-US")
+				in
+				    Typed
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

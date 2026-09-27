@@ -1,0 +1,7 @@
+expression DataRoot = "C:\Users\Bekir\Desktop\retailscope-crm-analytics\outputs\real\marts" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 38d3e629-a866-4607-bfe2-b24ff0eb37f8
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+

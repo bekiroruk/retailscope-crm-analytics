@@ -1,0 +1,33 @@
+table dim_product
+	lineageTag: c952df56-11b4-45db-b4d7-75be0dda16ca
+
+	column product_id
+		dataType: string
+		lineageTag: ed5215e5-d9f7-4dcf-a90a-53a3938be0b6
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_name
+		dataType: string
+		lineageTag: 99ea7ff8-6f7d-45f5-888b-24b7583b2cb8
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_product = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(Text.Combine({DataRoot, "dim_product.csv"}, "\")), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"product_id", type text}, {"product_name", type text}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

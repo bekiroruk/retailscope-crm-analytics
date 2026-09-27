@@ -1,0 +1,186 @@
+table customer_scores
+	lineageTag: f786eb17-57e3-46a4-aa2a-fe9167837b86
+
+	column customer_id
+		dataType: string
+		lineageTag: ac6b1fe7-ac1f-4965-9185-adf29c8791ff
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column snapshot_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: df23b222-ae6f-4faa-8d02-48bd47851653
+		summarizeBy: none
+		sourceColumn: snapshot_date
+
+		variation Variation
+			isDefault
+			relationship: 3c7d2da4-86f9-46bd-b515-b03954579671
+			defaultHierarchy: LocalDateTable_c98eeee9-06a0-4c9e-b28d-1c7ca89ba0e5.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column segment
+		dataType: string
+		lineageTag: 82293838-7283-4944-b331-62279a68c0d6
+		summarizeBy: none
+		sourceColumn: segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column rfm_score
+		dataType: string
+		lineageTag: 19f4a705-adca-4c87-a972-f02e1aa13c2a
+		summarizeBy: none
+		sourceColumn: rfm_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column r_score
+		dataType: int64
+		formatString: 0
+		lineageTag: b7f0f3c3-aae7-4a22-b5aa-7bbb963e57db
+		summarizeBy: sum
+		sourceColumn: r_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column f_score
+		dataType: int64
+		formatString: 0
+		lineageTag: 927a5c46-14b2-44de-9ad0-4c4a2f2a2751
+		summarizeBy: sum
+		sourceColumn: f_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column m_score
+		dataType: int64
+		formatString: 0
+		lineageTag: 92792cd1-0cc3-4cd6-a5c2-939c2526160d
+		summarizeBy: sum
+		sourceColumn: m_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column recency_days
+		dataType: double
+		lineageTag: 0687042f-2ae9-4c85-93b8-2a0c0e3a51ac
+		summarizeBy: sum
+		sourceColumn: recency_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column frequency_365
+		dataType: int64
+		formatString: 0
+		lineageTag: f9d14ac1-61b8-4fef-a0a4-cdc1a853c3ed
+		summarizeBy: sum
+		sourceColumn: frequency_365
+
+		annotation SummarizationSetBy = Automatic
+
+	column net_revenue_365
+		dataType: decimal
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: ada15f3d-0839-4a8f-835b-e0132a4b7e31
+		summarizeBy: sum
+		sourceColumn: net_revenue_365
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	column inactive_risk90
+		dataType: double
+		formatString: %0.0;-%0.0;%0.0
+		lineageTag: c9377c50-ce70-4dd3-8387-4d65bdb75ba1
+		summarizeBy: sum
+		sourceColumn: inactive_risk90
+
+		annotation SummarizationSetBy = Automatic
+
+	column expected_revenue90
+		dataType: decimal
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 7bc84ecf-4403-414f-b5d3-f6da3bef215a
+		summarizeBy: sum
+		sourceColumn: expected_revenue90
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	column top_product_id
+		dataType: string
+		lineageTag: 2f2463aa-39d0-44da-b6b2-8c90dcbdb7d4
+		summarizeBy: none
+		sourceColumn: top_product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column top_product_name
+		dataType: string
+		lineageTag: a9a4ebec-f524-4d7f-bb2f-602549b3e15b
+		summarizeBy: none
+		sourceColumn: top_product_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column activation_eligible
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 1b5ec51b-6cb5-4975-8f48-8a7261ef5f32
+		summarizeBy: none
+		sourceColumn: activation_eligible
+
+		annotation SummarizationSetBy = Automatic
+
+	column activation_exclusion_reason
+		dataType: string
+		lineageTag: 657cb20c-d24e-4cdd-bcf2-4d3e5e949401
+		summarizeBy: none
+		sourceColumn: activation_exclusion_reason
+
+		annotation SummarizationSetBy = Automatic
+
+	column analysis_priority
+		dataType: decimal
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 3203572b-0608-4a76-b98e-2cfc6db4e9a6
+		summarizeBy: sum
+		sourceColumn: analysis_priority
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	partition customer_scores = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(Text.Combine({DataRoot, "customer_scores.csv"}, "\")), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {
+				        {"customer_id", type text}, {"snapshot_date", type date}, {"segment", type text},
+				        {"rfm_score", type text}, {"r_score", Int64.Type}, {"f_score", Int64.Type},
+				        {"m_score", Int64.Type}, {"recency_days", type number}, {"frequency_365", Int64.Type},
+				        {"net_revenue_365", Currency.Type}, {"inactive_risk90", type number},
+				        {"expected_revenue90", Currency.Type}, {"top_product_id", type text},
+				        {"top_product_name", type text}, {"activation_eligible", type logical},
+				        {"activation_exclusion_reason", type text}, {"analysis_priority", Currency.Type}
+				    }, "en-US")
+				in
+				    Typed
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

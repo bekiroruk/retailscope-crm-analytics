@@ -1,0 +1,27 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: tr-TR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["DataRoot","dim_customer","dim_product","dim_date","fact_sales","customer_scores","cohort_retention","data_quality_metrics","model_metrics"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_customer
+ref table dim_product
+ref table dim_date
+ref table DateTableTemplate_b4fe3790-02ab-4c89-8ba0-8cad579ec75a
+ref table fact_sales
+ref table customer_scores
+ref table LocalDateTable_c98eeee9-06a0-4c9e-b28d-1c7ca89ba0e5
+ref table cohort_retention
+ref table data_quality_metrics
+ref table model_metrics
+
+ref cultureInfo en-US
+

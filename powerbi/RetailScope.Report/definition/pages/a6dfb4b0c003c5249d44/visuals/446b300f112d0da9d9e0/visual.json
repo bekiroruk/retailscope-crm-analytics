@@ -1,0 +1,147 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "446b300f112d0da9d9e0",
+  "position": {
+    "x": 252.38162544169612,
+    "y": 265.9505300353357,
+    "z": 7000,
+    "height": 329.27208480565372,
+    "width": 796.0424028268551,
+    "tabOrder": 7000
+  },
+  "visual": {
+    "visualType": "scatterChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "customer_scores"
+                    }
+                  },
+                  "Property": "customer_id"
+                }
+              },
+              "queryRef": "customer_scores.customer_id",
+              "nativeQueryRef": "customer_id",
+              "active": true
+            }
+          ]
+        },
+        "Size": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "analysis_priority"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.analysis_priority)",
+              "nativeQueryRef": "Sum of analysis_priority"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "segment"
+                    }
+                  },
+                  "Function": 3
+                }
+              },
+              "queryRef": "Min(customer_scores.segment)",
+              "nativeQueryRef": "First segment"
+            }
+          ]
+        },
+        "X": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "inactive_risk90"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.inactive_risk90)",
+              "nativeQueryRef": "Sum of inactive_risk90",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "customer_scores"
+                        }
+                      },
+                      "Property": "expected_revenue90"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(customer_scores.expected_revenue90)",
+              "nativeQueryRef": "Sum of expected_revenue90"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Inactivity risk vs expected 90-day revenue'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}
